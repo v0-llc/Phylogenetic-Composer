@@ -1,4 +1,5 @@
 var audioContext = new AudioContext;
+var convolver = audioContext.createConvolver();
 
 var masterGain = audioContext.createGain();
 masterGain.connect(audioContext.destination);
@@ -28,12 +29,24 @@ var AudioNode = function(){
     this.vca = audioContext.createGain();
     this.vca.gain.value = 0.0;
     
+    this.attackTime = Math.random();
+    this.releaseTime = Math.random();
+    
     this.vco.connect(this.vca);
     
     this.vca.connect(masterGain);
+    
+    this.trigger = function(){
+        this.vca.gain.cancelScheduledValues(audioContext.currentTime);
+        this.vca.gain.setValueAtTime(0, audioContext.currentTime);
+        this.vca.gain.linearRampToValueAtTime(0.1, audioContext.currentTime+this.attackTime);
+        this.vca.gain.linearRampToValueAtTime(0.0, audioContext.currentTime+this.attackTime+this.releaseTime);
+    };
 };
 
+// This is a weird implementation of note conversion - should probably just switch to something like noteToConvert%12...
 function convertToKey(noteToConvert){
+    
     var checkedValue = noteToConvert/12;
     checkedValue = checkedValue - Math.floor(checkedValue);
     checkedValue = checkedValue.toPrecision(3);

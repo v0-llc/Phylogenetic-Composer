@@ -87,6 +87,7 @@ var Node = function (newickNode) {
     var noiseCounter = 0.0;
 
     this.triggered = false;
+    this.envStart = false;
     this.noteCounter = 0;
     this.noteDuration = Math.floor((Math.random()*4+1)) * 50;
     console.log(this.noteDuration);
@@ -153,9 +154,12 @@ var Node = function (newickNode) {
 
         this.colliderObj.name = nodes.indexOf(this);
 
-        if (this.activated && this.level==0) {
-            this.activeTimer++;
+        if(this.level==0){
             this.tempTrigCount++;
+        }
+        
+        if (this.activated) {
+            this.activeTimer++;            
         } else {
             this.deactivatedTimer++;
         }
@@ -266,21 +270,24 @@ var Node = function (newickNode) {
 
         this.innerMesh.scale.set(hoverCounter + 0.01, hoverCounter + 0.01, 1);
 
-        if(this.tempTrigCount > 200){
+        if(this.tempTrigCount > 400){
             this.triggered = true;
             this.tempTrigCount = 0;
         }
         
         if (this.triggered) {
-            this.audioNode.vca.gain.value = 0.1;
             this.nodeMat.color.setHex(0xcc5511);
             this.noteCounter++;
+            if(!this.envStart){
+                this.audioNode.trigger();
+                this.envStart = true;
+            }
         }else{
             this.nodeMat.color.setHex(0xeeeeee);
         }
         if(this.noteCounter > this.noteDuration){
-            this.audioNode.vca.gain.value = 0.0;
             this.triggered = false;
+            this.envStart = false;
             this.noteCounter = 0.0;
             this.triggerChildren();
         }
