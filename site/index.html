@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Phylogenetic Composer</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400italic,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
+
+    <!-- SCRIPTS -->
+    <script type="text/javascript" src="js/lib/three.min.js"></script>
+    <script type="text/javascript" src="js/lib/perlin.js"></script>
+    <script type="text/javascript" src="js/lib/Tween.js"></script>
+    
+    <script type="text/javascript" src="js/newickStrings.js"></script>
+    <script type="text/javascript" src="js/newickParser.js"></script>
+    <script type="text/javascript" src="js/node.js"></script> 
+    <script type="text/javascript" src="js/audioManager.js"></script>
+    <script type="text/javascript" src="js/treeOfLife.js" defer></script>
+
+    <style type="text/css">
+        html {
+            overflow: hidden;
+        }
+        
+        body {
+            padding: 0px;
+            margin: 0px;
+        }
+        
+        #glContainer {
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-family: 'Libre Baskerville', serif;
+            font-size: 40px;
+            font-weight: 100;
+            letter-spacing: 13px;
+        }
+        
+        h2 {
+            font-family: 'Lato', sans-serif;
+            font-weight: 300;
+            font-size: 15px;
+            letter-spacing: 8px;
+            color: antiquewhite;
+        }
+        
+        .borderDiv {
+            border-top: dashed 1px white;
+            width: 50px;
+            margin: auto;
+            height: 15px;
+        }
+        
+        #description {
+            box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.3);
+            color: white;
+            background-color: rgba(0, 15, 30, 0.9);
+            z-index: 5;
+            position: fixed;
+            left: 50%;
+            top: 0px;
+            margin-left: -50%;
+            width: 100%;
+            text-align: center;
+        }
+        
+        #currentNode {
+            text-transform: capitalize;
+            font-family: 'Libre Baskerville', serif;
+
+            font-size: 30px;
+            position: fixed;
+            bottom: 50px;
+            left: 50%;
+            margin-left: -50%;
+            color:antiquewhite;
+            width: 100%;
+            z-index: 6;
+            text-align: center;
+            
+        }
+    </style>
+</head>
+
+<!---------------- BODY ---------------->
+
+<body>
+    <div id="glContainer">
+        
+    </div>
+
+    <div id="description">
+        <h1 id="descriptHeading"><em>Phylogenetic<br>Composer</em></h1>
+        <div class="borderDiv"></div>
+        <h2 id="descriptContent">Procedural Music with the Tree of Life</h2>
+
+
+    </div>
+
+    <div id="currentNode">
+        
+    </div>
+    
+</body>
+
+</html>
