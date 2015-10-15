@@ -85,13 +85,12 @@ var Node = function (newickNode) {
     this.adjustCounter = 0.0;
 
     var noiseCounter = 0.0;
-
+    
     this.triggered = false;
-    this.envStart = false;
-    this.noteCounter = 0;
-    this.noteDuration = Math.floor((Math.random()*4+1)) * 50;
-    console.log(this.noteDuration);
-    this.tempTrigCount = 0;
+    if(this.level==0){
+        this.triggered = true;
+        this.audioNode.noteLength = 4;
+    }
 
     /******** POSITION ********/
     this.lastOrigin = new THREE.Vector3();
@@ -145,18 +144,16 @@ var Node = function (newickNode) {
         nodes.splice(nodes.indexOf(this), 1);
 
     };
+    
     this.triggerChildren = function(){
         for(var i = 0; i < this.childNodes.length; i++){
             this.childNodes[i].triggered = true;
         }
-    };
+    };    
+
     this.update = function () {
-
+        
         this.colliderObj.name = nodes.indexOf(this);
-
-        if(this.level==0){
-            this.tempTrigCount++;
-        }
         
         if (this.activated) {
             this.activeTimer++;            
@@ -270,26 +267,26 @@ var Node = function (newickNode) {
 
         this.innerMesh.scale.set(hoverCounter + 0.01, hoverCounter + 0.01, 1);
 
-        if(this.tempTrigCount > 400){
-            this.triggered = true;
-            this.tempTrigCount = 0;
+        if(this.triggered){
+            this.mesh.material.color.setHex(0xcc5511);
+        }else{
+            this.mesh.material.color.setHex(0xeeeeee);
+        }
+        if(this.triggered && !this.audioNode.notePlaying){
+            this.audioNode.notePlaying = true;
+            this.audioNode.trigger();
+        }
+        if(this.audioNode.notePlaying && audioContext.currentTime > this.audioNode.noteStart + this.audioNode.noteLength){
+            this.audioNode.notePlaying = false;
+            this.triggered = false;
+            this.triggerChildren();
         }
         
-        if (this.triggered) {
-            this.nodeMat.color.setHex(0xcc5511);
-            this.noteCounter++;
-            if(!this.envStart){
-                this.audioNode.trigger();
-                this.envStart = true;
+        if(this.level==0){
+            getAverage();
+            if(!this.audioNode.notePlaying && audioContext.currentTime > this.audioNode.noteStart + this.audioNode.noteLength*2){
+                this.triggered = true;
             }
-        }else{
-            this.nodeMat.color.setHex(0xeeeeee);
-        }
-        if(this.noteCounter > this.noteDuration){
-            this.triggered = false;
-            this.envStart = false;
-            this.noteCounter = 0.0;
-            this.triggerChildren();
         }
     };
 };
