@@ -16,7 +16,7 @@ function getAverage(){
     
     var average = runningValue/dataArray.length;
     
-    console.log(average);
+    //console.log(average);
 }
 
 var masterGain = audioContext.createGain();

@@ -134,6 +134,8 @@ var Node = function (newickNode) {
         scene.remove(this.innerMesh);
         scene.remove(this.curveObj);
         scene.remove(this.colliderObj);
+        
+        this.audioNode.vco.stop();
 
         var currentParent = this.parentNode;
         while (currentParent != null) {
@@ -147,7 +149,9 @@ var Node = function (newickNode) {
     
     this.triggerChildren = function(){
         for(var i = 0; i < this.childNodes.length; i++){
-            this.childNodes[i].triggered = true;
+            if(this.childNodes[i].activated || this.childNodes[i].newickNode.childNodes.length==0){
+                this.childNodes[i].triggered = true;
+            }
         }
     };    
 

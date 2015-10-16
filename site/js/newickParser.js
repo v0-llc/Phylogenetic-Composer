@@ -2,7 +2,7 @@ var NewickParser = function(){
     
     this.newickNodes = [];
     
-    var rawText = primatesString;
+    var rawText = mammalsString;
     
     this.parseString = function(){
         
