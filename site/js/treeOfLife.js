@@ -8,6 +8,8 @@ var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHei
 camera.position.z = 10;
 camera.position.y = 5;
 
+var articleShown = true;
+
 var mouseClicked = false;
 var clickStart = new THREE.Vector2();
 var clickDelta = new THREE.Vector2();
@@ -202,6 +204,21 @@ function onMouseClick(event) {
         if (!selectedNode.activated && selectedNode.deactivatedTimer >= 120) {
             selectedNode.createChildren();
         }
+        
+        if(articleShown){
+            document.getElementById("articleContent").setAttribute("src", "http://en.m.wikipedia.org/wiki/" + nodes[intersectedNodes[0].object.name].newickNode.displayString);
+        }
+    }
+}
+
+function toggleArticle(){
+    articleShown = !articleShown;
+    if(articleShown){
+        //document.getElementById("articleToggle").className = "arrow rightArrow";
+        document.getElementById("article").className = "visible";
+    }else{
+        //document.getElementById("articleToggle").className = "arrow leftArrow";
+        document.getElementById("article").className = "hidden";
     }
 }
 

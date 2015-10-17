@@ -84,6 +84,69 @@
             text-align: center;
             
         }
+        #article{
+            position: fixed;
+            top: 250px;
+            bottom: 20px;
+            
+        }
+        .hidden{
+            right: -410px;
+            transition: .5s all;
+        }
+        .visible{
+            right: 20px;
+            transition: .5s all;
+        }
+        #article iframe{
+            height: 95%;
+            width: 400px;
+        }
+        #articleToggle{
+            text-align: center;
+        }
+        #articleToggle img{
+            width: 30px;
+            height: 30px;
+        }
+        .arrow{
+            position: absolute;
+            top: 20%;
+            left: -50px;
+            width: 0px;
+            height: 0px;
+            
+            border-top: solid 45px transparent;
+            border-bottom: solid 45px transparent;
+            
+            transition: .2s all;
+        }
+        #wikiArrow{
+            position: absolute;
+            top:25%;
+            left: -38px;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+        }
+        .rightArrow{
+            border-right: solid 0px transparent;
+            border-left: solid 45px white;
+        }
+        .rightArrow:hover{
+            border-left: solid 45px #cc5511;
+            transition: .2s all;
+        }
+
+        .leftArrow{            
+            border-right: solid 45px white;
+            border-left: solid 0px transparent;           
+        }
+        .leftArrow:hover{
+            border-right: solid 45px #cc5511;
+            transition: .2s all;
+        }
+
 
     </style>
 </head>
@@ -103,6 +166,13 @@
         <h2 id="descriptContent">Procedural Music with the Tree of Life</h2>
 
 
+    </div>
+    
+    <div id="article" class="visible">
+        <div id="articleToggle" class="arrow leftArrow" onclick="toggleArticle()">            
+        </div>
+        <img id="wikiArrow" src="images/Wikipedia-W-visual-balanced.svg">
+        <iframe id="articleContent" src="http://en.m.wikipedia.org/wiki/mammalia"></iframe>
     </div>
 
     <div id="currentNode">
