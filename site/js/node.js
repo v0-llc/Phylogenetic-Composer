@@ -65,7 +65,7 @@ var Node = function (newickNode, childID) {
     this.lineMat.transparent = true;
     this.lineMat.opacity = 0.0;
 
-    this.curve = new THREE.CubicBezierCurve3(new THREE.Vector3, new THREE.Vector3, new THREE.Vector3, new THREE.Vector3);
+    this.curve = new THREE.CubicBezierCurve3(new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3());
     this.curveGeom = new THREE.Geometry;
     var maxCurve = new THREE.Geometry;
 
@@ -90,8 +90,7 @@ var Node = function (newickNode, childID) {
     var noiseCounter = 0.0;
     
     this.triggered = false;
-    if(this.level==0){
-        this.triggered = true;
+    if(this.level === 0) {
         this.audioNode.noteLength = 4;
     }
 
@@ -303,7 +302,7 @@ var Node = function (newickNode, childID) {
         if(this.level==0){
             getAverage();
             if(!this.audioNode.notePlaying && audioContext.currentTime > this.audioNode.noteStart + this.audioNode.noteLength*2){
-                this.triggered = true;
+                if(this.activated) this.triggered = true;
             }
         }
     };

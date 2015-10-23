@@ -20,225 +20,8 @@
     <script type="text/javascript" src="js/audioManager.js"></script>
     <script type="text/javascript" src="js/treeOfLife.js" defer></script>
 
-    <style type="text/css">
-        html {
-            overflow: hidden;
-        }
-        
-        body {
-            padding: 0px;
-            margin: 0px;
-        }
-        
-        #glContainer {
-            overflow: hidden;
-        }
-        
-        h1 {
-            font-family: 'Libre Baskerville', serif;
-            font-size: 40px;
-            font-weight: 100;
-            letter-spacing: 13px;
-        }
-        
-        h2 {
-            font-family: 'Lato', sans-serif;
-            font-weight: 300;
-            font-size: 15px;
-            letter-spacing: 8px;
-            color: antiquewhite;
-        }
+    <link rel="stylesheet" type="text/css" href="style.css">
 
-        .borderDiv {
-            border-top: dashed 1px white;
-            width: 50px;
-            margin: auto;
-            height: 15px;
-        }
-        
-        #title {
-            box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.3);
-            color: white;
-            background-color: rgba(0, 15, 30, 0.9);
-            z-index: 5;
-            position: fixed;
-            left: 50%;
-            margin-left: -50%;
-            width: 100%;
-            text-align: center;            
-            
-            overflow: hidden;
-        }
-        .descriptHidden{
-            height: 220px;
-            transition: 1s all;
-        }
-        .descriptShown {
-            height: 100%;
-            transition: 1s all;
-        }
-        
-        #description {
-            margin: 0 auto;
-            margin-top: 50px;
-            width: 350px;
-            text-align: justify;
-            font-size: 15px;
-            z-index: 10;
-        }
-        #description p{
-            text-indent: 30px;
-        }
-        #description img{
-            margin-top:20px;
-            position: relative;
-            left:145px;
-        }
-        
-        .topShown {
-            top: 0%;
-            transition: 1s all;
-        }
-        
-        .topHidden {
-            top: -400px;
-            transition: 1s all;
-        }
-        
-        #currentNode {
-            text-transform: capitalize;
-            font-family: 'Libre Baskerville', serif;
-            font-size: 30px;
-            position: fixed;
-            bottom: 50px;
-            left: 50%;
-            margin-left: -50%;
-            color: antiquewhite;
-            width: 100%;
-            z-index: 6;
-            text-align: center;
-        }
-        
-        #article {
-            position: fixed;
-            top: 20px;
-            bottom: 20px;
-        }
-        
-        .hidden {
-            right: -410px;
-            transition: .5s all ease-out;
-        }
-        
-        .visible {
-            right: 20px;
-            transition: .5s all ease-out;
-        }
-        
-        #article iframe {
-            height: 100%;
-            width: 400px;
-        }
-        
-        #articleToggle {
-            text-align: center;
-        }
-        
-        #articleToggle img {
-            width: 30px;
-            height: 30px;
-        }
-        
-        .arrow {
-            position: absolute;
-            top: 40%;
-            left: -50px;
-            width: 0px;
-            height: 0px;
-            border-top: solid 45px transparent;
-            border-bottom: solid 45px transparent;
-            transition: .2s all;
-        }
-        
-        #logoBox {
-            position: absolute;
-            top: 40%;
-            left: -50px;
-            width: 90px;
-            height: 90px;
-            z-index: 5;
-            pointer-events: none;
-        }
-        
-        #wikiArrow {
-            position: absolute;
-            top: 25%;
-            left: 12%;
-            width: 35%;
-            height: 50%;
-            pointer-events: none;
-        }
-        
-        .rightArrow {
-            border-right: solid 0px transparent;
-            border-left: solid 45px white;
-        }
-        
-        .rightArrow:hover {
-            border-left: solid 45px #cc5511;
-            transition: .2s all;
-        }
-        
-        .leftArrow {
-            border-right: solid 45px white;
-            border-left: solid 0px transparent;
-        }
-        
-        .leftArrow:hover {
-            border-right: solid 45px #cc5511;
-            transition: .2s all;
-        }
-        
-        .button {
-            position:relative;
-            left: 0px;
-            top: 0px;
-            display: inline;
-
-            z-index: 6;
-            cursor: pointer;
-            border: solid 2px white;
-            border-radius: 5px;
-            
-            font-family: 'Lato', sans-serif;
-            color: white;
-            font-size: 15px;
-            font-weight: 500;
-            
-            padding: 10px 30px 10px 30px;
-            
-            transition: .2s all;
-        }
-        
-        .button:hover {
-            left: -5px;
-            top: -5px;
-            background-color: rgba(255, 255, 255, 0.2);
-            transition: .2s all;
-            
-            box-shadow: 5px 5px 0px #cc5511;
-        }
-        
-        #about{
-            position: fixed;
-            top: 20px;
-            left: 20px;
-        }
-        #about:hover{
-            top: 15px;
-            left: 15px;
-        }
-    </style>
 </head>
 
 <!---------------- BODY ---------------->
@@ -250,7 +33,7 @@
 
     </div>
 
-    <div class="button" id="about" onclick="showAbout()">
+    <div class="button" id="about" onclick="toggleArticle(false); toggleAbout(true); toggleTitle(true)">
         about
     </div>
 
@@ -260,24 +43,26 @@
         <h2 id="descriptContent">Procedural Music with the Tree of Life</h2>
 
         <div id="description">
-            <p>The Phylogenetic Composer is an interface between the Open Tree of Life and Wikipedia. The Open Tree of Life provides a comprehensive database of every known species on our planet, and their evolutionary relationships. Circles in the Phylogenetic Composer represent individual taxa (or multiple related taxa).</p>
+            <p>The Phylogenetic Composer is an interface between the <a href="http://opentreeoflife.org/" target="_blank">Open Tree of Life</a> and <a href="https://www.wikipedia.org/" target="_blank">Wikipedia</a>, created primarily with <a href="http://threejs.org/" target="_blank">three.js</a> and the <a href="http://webaudio.github.io/web-audio-api/" target="_blank">Web Audio API</a>. The Open Tree of Life provides a comprehensive database of every known species on our planet, and their evolutionary relationships. Circles in the Phylogenetic Composer represent individual taxa (or multiple related taxa).</p>
             <p>Click or tap on these circles in order to reveal descendant taxa and species. Click and hold again to "close" open taxa. You can also zoom in and out with the mouse wheel, and click and drag to move the camera to get a closer look at certain branches of the tree of life.</p>
             <p>As you explore the tree, its branches and leaves will generate musical structures, using the textual data of each node. If you're interested in the specific implementation of this algorithm, or simply want to learn more about this project, please visit the GitHub link below.</p>
             
             <p style="text-align:right">- Theodore Michels, 2015</p>
             
 
-            <img src="images/githubiconwhite.svg" style="width:60px; height: 60px">
+            <a href="https://github.com/TheodoreMichels/Phylogenetic-Composer" target="_blank">
+                <img src="images/githubiconwhite.svg" style="width:60px; height: 60px">
+            </a>
 
             <div style="text-align:center; margin-top: 40px;">
-            <div class="button" onclick="hideAbout()">close</div>
+            <div class="button" onclick="toggleAbout(false)">close</div>
             </div>
             
         </div>
     </div>
 
     <div id="article" class="hidden">
-        <div id="articleToggle" class="arrow leftArrow" onclick="toggleArticle()">
+        <div id="articleToggle" class="arrow leftArrow" onclick="toggleArticle(!articleShown)">
         </div>
         <div id="logoBox">
             <img id="wikiArrow" src="images/Wikipedia-W-visual-balanced.svg">

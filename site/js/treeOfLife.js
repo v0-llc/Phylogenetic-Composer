@@ -7,7 +7,7 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 100);
 camera.position.z = 10;
 camera.position.y = 5;
-//camera.rotation.x = 1;
+camera.rotation.x = 0;
 //camera.rotation.y = 1;
 
 var articleShown = false;
@@ -63,8 +63,28 @@ var colliderGeom = new THREE.BoxGeometry(1, 1, 1);
 // Create the first node - the "root" of the tree
 createNode(0, null);
 
+/******** PARTICLES ********/
+var pGeom = new THREE.Geometry();
+var pMat = new THREE.PointCloudMaterial({size: 0.04, sizeAttenuation: true});
+for(var i = 0; i < 1000; i++){
+    var vertex = new THREE.Vector3();
+    vertex.x = Math.random() * 80 - 40;
+    vertex.y = Math.random() * 80 - 40;
+    vertex.z = Math.random() * 20 - 10;
+    
+    pGeom.vertices.push(vertex);
+}
+
+var particles = new THREE.Points(pGeom, pMat);
+
+scene.add(particles);
+var particleNoiseCounter = 0.0;
 /******** GLOBALS ********/
 var randAmp = 0.21; // Controls the "amplitude" of perlin noise movement
+
+var titleElement = document.getElementById("title");
+
+var overlayShown = false;
 
 /******** RENDER ********/
 function render() {
@@ -77,7 +97,7 @@ function render() {
         nodes[i].hovered = false;
     }
 
-    if (intersectedNodes.length > 0) {
+    if (intersectedNodes.length > 0 && !overlayShown) {
         var nodeNum = intersectedNodes[0].object.name;
         nodes[nodeNum].hovered = true;
         document.getElementById("currentNode").innerHTML = nodes[intersectedNodes[0].object.name].newickNode.displayString;
@@ -108,6 +128,16 @@ function render() {
         camera.updateProjectionMatrix();
     }
 
+    particleNoiseCounter += 0.01;
+    
+    for(var i = 0; i < scene.children.length; i++){
+        var object = scene.children[i];
+        
+        if(object instanceof THREE.Points){
+
+        }
+    }
+    
     renderer.render(scene, camera);
 
 }
@@ -182,6 +212,7 @@ function createNode(childID, parent) {
 }
 
 function removeChildren(parentNode) {
+    parentNode.triggered = false;
     parentNode.activated = false;
     parentNode.activeTimer = 0.0;
 
@@ -233,6 +264,7 @@ function onMouseMove(event) {
 
 function onMouseClick(event) {
 
+    if(overlayShown) return;
     mouseClicked = true;
     event.preventDefault();
 
@@ -244,11 +276,11 @@ function onMouseClick(event) {
     if (intersectedNodes.length > 0) {
 
         interactedWith = true;
-        document.getElementById("title").classList.remove("topShown");
-        document.getElementById("title").classList.add("topHidden");
+        toggleTitle(false);
 
         var selectedNode = nodes[intersectedNodes[0].object.name];
-
+        selectedNode.triggered = true;
+        
         if (selectedNode.activated) {
             timeoutVar = window.setTimeout(function () {
                 removeChildren(selectedNode);
@@ -268,11 +300,13 @@ function onMouseClick(event) {
     }
 }
 
-function toggleArticle() {
+function toggleArticle(state) {
     interactedWith = true;
-    document.getElementById("title").classList.remove("topShown");
-    document.getElementById("title").classList.add("topHidden");
-    articleShown = !articleShown;
+    
+    toggleTitle(false);
+    
+    articleShown = state;
+    
     if (articleShown) {
         //document.getElementById("articleToggle").className = "arrow rightArrow";
         document.getElementById("article").className = "visible";
@@ -282,15 +316,25 @@ function toggleArticle() {
     }
 }
 
-function showAbout(){
-    document.getElementById("title").classList.remove("topHidden");
-    document.getElementById("title").classList.add("topShown");
-    document.getElementById("title").classList.remove("descriptHidden");
-    document.getElementById("title").classList.add("descriptShown");
+function toggleTitle(state){
+    if(state==true){
+        titleElement.classList.remove("topHidden");
+        titleElement.classList.add("topShown");
+    }else{
+        titleElement.classList.remove("topShown");
+        titleElement.classList.add("topHidden");
+    }
 }
-function hideAbout(){
-    document.getElementById("title").classList.remove("descriptShown");
-    document.getElementById("title").classList.add("descriptHidden");
+
+function toggleAbout(state){
+    overlayShown = state;
+    if(state==true){        
+        titleElement.classList.remove("descriptHidden");
+        titleElement.classList.add("descriptShown");
+    }else{
+        titleElement.classList.remove("descriptShown");
+        titleElement.classList.add("descriptHidden");
+    }
 }
 
 function onMouseUp() {
@@ -299,6 +343,7 @@ function onMouseUp() {
 }
 
 function onDocumentMouseWheel(event) {
+    if(overlayShown) return;
     if (event.wheelDeltaY) {
 
         if ((event.wheelDeltaY > 0 && currentZoomDest > 10) || (event.wheelDeltaY < 0 && currentZoomDest < 120)) {
