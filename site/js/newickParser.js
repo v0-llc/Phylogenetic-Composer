@@ -18,6 +18,7 @@ var NewickParser = function(){
                 
                 if((currentChar == ',' || currentChar == ')') && lastChar == ')'){
                     var combinationNode = new NewickNode(currentLevel, "");
+                    combinationNode.combinedNode = true;
                     this.newickNodes.push(combinationNode);
                     
                     var j = this.newickNodes.length-2;
@@ -33,8 +34,8 @@ var NewickParser = function(){
                     }
                     var testString = combinationNode.displayString.replace('...','');
                     var testArray = testString.split('+');
-                    if(testArray.length > 3){
-                        testArray = testArray.splice(0, 3);
+                    if(testArray.length > 2){
+                        testArray = testArray.splice(0, 2);
                         combinationNode.displayString = testArray.join('+');
                         combinationNode.displayString = combinationNode.displayString.concat('...');
                     }
@@ -80,10 +81,49 @@ var NewickNode = function(level, string){
     this.childNodes = [];
     
     this.level = level;
-    
+    this.combinedNode = false;
     var rawString = string;    
     var tempArray = rawString.split('_');
     tempArray = tempArray.slice(0, tempArray.length-1);    
     this.displayString = tempArray.join(" ");    
-
+    this.algorithmString = this.displayString;
+    
+    this.notesArray = [];
+    this.peakLetter = 0;
+    
 };
+
+function nameToNotes(node){
+    
+    var stringArray = node.displayString.split(' ');
+    
+    if(stringArray.length >= 2){
+        if(stringArray[1] != "+"){
+            node.algorithmString = stringArray[1];
+        }else{
+            node.algorithmString = stringArray[0];
+        }
+    }
+    
+    var tempPeak = node.algorithmString.charCodeAt(0);
+    
+    for(var i = 0; i < node.algorithmString.length; i++){        
+        
+        var asciiVal = node.algorithmString.charCodeAt(i);
+        
+        if( // only letters and numbers
+            (asciiVal>=48 && asciiVal<=57) || (asciiVal>=65 && asciiVal<=90) || (asciiVal>=97 && asciiVal<=122)
+        )
+        {
+            node.notesArray.push(asciiVal);
+            
+            if(asciiVal >= 65 && asciiVal <= 90){
+                asciiVal += 32;
+            }
+            if(asciiVal > tempPeak){
+                node.peakLetter = i;
+                tempPeak = asciiVal;
+            }
+        }
+    }
+}

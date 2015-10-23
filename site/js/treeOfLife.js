@@ -7,12 +7,19 @@ var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 100);
 camera.position.z = 10;
 camera.position.y = 5;
+//camera.rotation.x = 1;
+//camera.rotation.y = 1;
 
-var articleShown = true;
+var articleShown = false;
+var articleString = "Mammalia";
 
 var mouseClicked = false;
+var timeoutVar;
+var interactedWith = false;
 var clickStart = new THREE.Vector2();
 var clickDelta = new THREE.Vector2();
+
+var currentZoomDest = camera.fov;
 
 var raycaster = new THREE.Raycaster();
 var mouseVec = new THREE.Vector2();
@@ -74,11 +81,31 @@ function render() {
         var nodeNum = intersectedNodes[0].object.name;
         nodes[nodeNum].hovered = true;
         document.getElementById("currentNode").innerHTML = nodes[intersectedNodes[0].object.name].newickNode.displayString;
+    }else{
+        document.getElementById("currentNode").innerHTML = "";
     }
 
     // Look through all of the nodes and update them.
     for (var i = nodes.length - 1; i >= 0; i--) {
         nodes[i].update();
+    }
+
+    if (camera.fov != currentZoomDest) {
+        
+        if(camera.fov > currentZoomDest){
+            camera.fov -= 1.0;
+        }
+        if(camera.fov < currentZoomDest){
+            camera.fov += 1.0;
+        }
+        
+        if (camera.fov < 10) {
+            camera.fov = 10;
+        }
+        if (camera.fov > 120) {
+            camera.fov = 120;
+        }
+        camera.updateProjectionMatrix();
     }
 
     renderer.render(scene, camera);
@@ -130,7 +157,7 @@ function recalculateOrigins() {
 function createNode(childID, parent) {
 
     if (parent != null) {
-        var newNode = new Node(parent.newickNode.childNodes[childID]);
+        var newNode = new Node(parent.newickNode.childNodes[childID], childID);
 
         newNode.parentNode = parent;
         newNode.childID = childID;
@@ -152,6 +179,17 @@ function createNode(childID, parent) {
 
         newNode.arrangeID = "0";
     }
+}
+
+function removeChildren(parentNode) {
+    parentNode.activated = false;
+    parentNode.activeTimer = 0.0;
+
+    for (var i = parentNode.allChildren.length - 1; i >= 0; i--) {
+        parentNode.allChildren[i].deactivate();
+    }
+    parentNode.allChildren = [];
+    recalculateOrigins();
 }
 
 function onWindowResize() {
@@ -176,15 +214,25 @@ function onMouseMove(event) {
         mouseDelta.x = mouseVec.x - mouseLast.x;
         mouseDelta.y = mouseVec.y - mouseLast.y;
 
-        camera.position.x -= mouseDelta.x * 8;
-        camera.position.y -= mouseDelta.y * 8;
+        if(camera.position.x <= 20 && camera.position.x >= -20){
+            camera.position.x -= mouseDelta.x * 8;
+        }
+        if(camera.position.y <= 20 && camera.position.y >= -20){
+            camera.position.y -= mouseDelta.y * 8;
+        }
 
+        if(camera.position.x > 20) camera.position.x = 20;
+        if(camera.position.x < -20) camera.position.x = -20;
+        if(camera.position.y > 20) camera.position.y = 20;
+        if(camera.position.y < -20) camera.position.y = -20;
+        
         mouseLast.x = mouseVec.x;
         mouseLast.y = mouseVec.y;
     }
 }
 
 function onMouseClick(event) {
+
     mouseClicked = true;
     event.preventDefault();
 
@@ -195,51 +243,69 @@ function onMouseClick(event) {
 
     if (intersectedNodes.length > 0) {
 
+        interactedWith = true;
+        document.getElementById("title").classList.remove("topShown");
+        document.getElementById("title").classList.add("topHidden");
+
         var selectedNode = nodes[intersectedNodes[0].object.name];
 
-        if (selectedNode.activated && selectedNode.activeTimer >= 120) {
-            selectedNode.removeChildren();
+        if (selectedNode.activated) {
+            timeoutVar = window.setTimeout(function () {
+                removeChildren(selectedNode);
+            }, 1500);
         }
 
         if (!selectedNode.activated && selectedNode.deactivatedTimer >= 120) {
             selectedNode.createChildren();
         }
-        
-        if(articleShown){
-            document.getElementById("articleContent").setAttribute("src", "http://en.m.wikipedia.org/wiki/" + nodes[intersectedNodes[0].object.name].newickNode.displayString);
+
+        var articleName = nodes[intersectedNodes[0].object.name].newickNode.displayString;
+
+        if (articleShown && !selectedNode.newickNode.combinedNode && articleName != articleString) {
+            articleString = articleName;
+            document.getElementById("articleContent").setAttribute("src", "http://en.m.wikipedia.org/wiki/" + articleName);
         }
     }
 }
 
-function toggleArticle(){
+function toggleArticle() {
+    interactedWith = true;
+    document.getElementById("title").classList.remove("topShown");
+    document.getElementById("title").classList.add("topHidden");
     articleShown = !articleShown;
-    if(articleShown){
+    if (articleShown) {
         //document.getElementById("articleToggle").className = "arrow rightArrow";
         document.getElementById("article").className = "visible";
-    }else{
+    } else {
         //document.getElementById("articleToggle").className = "arrow leftArrow";
         document.getElementById("article").className = "hidden";
     }
 }
 
+function showAbout(){
+    document.getElementById("title").classList.remove("topHidden");
+    document.getElementById("title").classList.add("topShown");
+    document.getElementById("title").classList.remove("descriptHidden");
+    document.getElementById("title").classList.add("descriptShown");
+}
+function hideAbout(){
+    document.getElementById("title").classList.remove("descriptShown");
+    document.getElementById("title").classList.add("descriptHidden");
+}
+
 function onMouseUp() {
     mouseClicked = false;
+    window.clearTimeout(timeoutVar);
 }
 
 function onDocumentMouseWheel(event) {
     if (event.wheelDeltaY) {
-        
-        if((event.wheelDeltaY > 0 && camera.fov > 10) || (event.wheelDeltaY < 0 && camera.fov < 120)){
-            camera.fov -= event.wheelDeltaY * 0.05;
-            
-            if(camera.fov < 10){
-                camera.fov = 10;
-            }
-            if(camera.fov > 120){
-                camera.fov = 120;
-            }
-            camera.updateProjectionMatrix();
-        }       
+
+        if ((event.wheelDeltaY > 0 && currentZoomDest > 10) || (event.wheelDeltaY < 0 && currentZoomDest < 120)) {
+            currentZoomDest -= event.wheelDeltaY * 0.05;
+
+
+        }
     }
 }
 

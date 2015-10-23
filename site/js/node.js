@@ -3,12 +3,13 @@ Contains the Node class which contains most of the visual behavior for individua
 */
 
 // The constructor requires an associated NewickNode, which contains the associated phylogenetic information.
-var Node = function (newickNode) {
+var Node = function (newickNode, childID) {
     this.newickNode = newickNode;
-    this.audioNode = new AudioNode();
+    nameToNotes(this.newickNode);
+    this.audioNode = new AudioNode(newickNode);    
+    
     // Effectively, the "distance" from the tree's origin
     this.level = this.newickNode.level;
-    this.childID;
     this.arrangeID;
 
     /******** GEOMETRY ********/
@@ -21,13 +22,15 @@ var Node = function (newickNode) {
     }
     // Taxa are circles, while species are diamonds
     if (this.newickNode.childNodes.length > 0) {
-        this.nodeGeom = new THREE.CircleGeometry(circleRadius, 32);
+        this.nodeGeom = new THREE.CircleGeometry(circleRadius, 40);
     } else {
         this.nodeGeom = new THREE.BoxGeometry(circleRadius * 3.0, circleRadius * 3.0, 0);
     }
     this.nodeMat = new THREE.MeshBasicMaterial({
         color: 0xeeeeee
     });
+    this.inactiveColor = new THREE.Color(0xeeeeee);
+    this.triggerColor = new THREE.Color(0xcc5511);
     this.nodeMat.transparent = true;
     this.nodeMat.opacity = 0.9;
     this.nodeMat.shading = THREE.FlatShading;
@@ -104,6 +107,27 @@ var Node = function (newickNode) {
     this.offset3 = Math.random();
     this.offset4 = Math.random();
 
+    var noteValue = 0;
+    
+    if(this.level != 0){
+        
+        var parentNoteID = (childID % (this.newickNode.parentNode.notesArray.length-1))+1;
+        var parentNote = this.newickNode.parentNode.notesArray[parentNoteID];
+
+        var thisNote = this.newickNode.notesArray[0];
+        
+        if(thisNote > 90){
+            thisNote -= 32;
+        }
+        noteValue = Math.round((parentNote + thisNote)/2);
+    }else{
+        noteValue = this.newickNode.notesArray[0];
+    }
+    
+    noteValue -= 20;
+    
+    this.audioNode.setFrequency(noteValue);
+    
     nodes.push(this);
 
     /******** Node Methods ********/
@@ -116,17 +140,7 @@ var Node = function (newickNode) {
         }
         recalculateOrigins();
     };
-
-    this.removeChildren = function () {
-        this.activated = false;
-        this.activeTimer = 0.0;
-
-        for (var i = this.allChildren.length - 1; i >= 0; i--) {
-            this.allChildren[i].deactivate();
-        }
-        this.allChildren = [];
-        recalculateOrigins();
-    };
+    
 
     this.deactivate = function () {
 
@@ -156,7 +170,6 @@ var Node = function (newickNode) {
     };    
 
     this.update = function () {
-        
         this.colliderObj.name = nodes.indexOf(this);
         
         if (this.activated) {
@@ -269,13 +282,14 @@ var Node = function (newickNode) {
             hoverCounter = 0.0;
         }
 
-        this.innerMesh.scale.set(hoverCounter + 0.01, hoverCounter + 0.01, 1);
+        this.innerMesh.scale.set(hoverCounter + 0.001, hoverCounter + 0.001, 1);
 
-        if(this.triggered){
-            this.mesh.material.color.setHex(0xcc5511);
-        }else{
-            this.mesh.material.color.setHex(0xeeeeee);
+        this.inactiveColor.setHex(0xeeeeee);
+        this.mesh.material.color.copy(this.inactiveColor.lerp(this.triggerColor, this.audioNode.vca.gain.value * 20.0));
+        if(!this.growing){
+            this.mesh.scale.set(1+this.audioNode.vca.gain.value * 10.0,1+this.audioNode.vca.gain.value * 10.0,1);
         }
+
         if(this.triggered && !this.audioNode.notePlaying){
             this.audioNode.notePlaying = true;
             this.audioNode.trigger();

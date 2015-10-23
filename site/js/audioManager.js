@@ -57,15 +57,19 @@ testOscGainNode.connect(masterGain);
 
 var noteDurationValues = [0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0];
 
-var AudioNode = function () {
+var AudioNode = function (newickNode) {
+    this.setFrequency = function(note){
+        this.noteValue = note;
+        this.noteValue = convertToKey(this.noteValue);
+        var freqValue = Math.pow(2, (this.noteValue - 69) / 12) * 440;
+        this.vco.frequency.value = freqValue;
+    };
+    
     this.vco = audioContext.createOscillator();
     this.vco.type = "sine";
 
-    var noteValue = Math.floor((Math.random() * 48 + 40));
-    noteValue = convertToKey(noteValue);
-    var freqValue = Math.pow(2, (noteValue - 69) / 12) * 440;
+    this.setFrequency(Math.floor((Math.random() * 48 + 40)));
 
-    this.vco.frequency.value = freqValue;
     this.vco.start();
 
     this.vca = audioContext.createGain();
@@ -75,7 +79,7 @@ var AudioNode = function () {
     this.delay.delayTime.value = 0.5;
 
     this.feedback = audioContext.createGain();
-    this.feedback.gain.value = 0.6;
+    this.feedback.gain.value = 0.5;
 
     this.vca.connect(this.delay);
     this.delay.connect(this.feedback);
@@ -83,12 +87,27 @@ var AudioNode = function () {
 
     this.feedback.connect(masterGain);
 
-    this.noteLength = 1 / noteDurationValues[Math.floor(Math.random() * noteDurationValues.length)];
+    var durationVal = newickNode.algorithmString.length;
+    durationVal = (noteDurationValues.length+5) - durationVal;
+    if(durationVal < 0){
+        durationVal = 0;
+    }
+    if(durationVal > noteDurationValues.length-1){
+        durationVal = noteDurationValues.length-1;
+    }
+    //this.noteLength = 1 / noteDurationValues[Math.floor(Math.random() * noteDurationValues.length)];
+    this.noteLength = 1 / noteDurationValues[durationVal];
     this.noteStart;
     this.notePlaying = false;
     
-    this.attackTime = Math.random() * (this.noteLength/2);
-    this.releaseTime = Math.random() * (this.noteLength/2);
+    //this.attackTime = Math.random() * (this.noteLength);
+    //this.releaseTime = Math.random() * (this.noteLength-this.attackTime);
+    if(newickNode.peakLetter == 0){
+        this.attackTime = 0;
+    }else{
+        this.attackTime = (newickNode.peakLetter/newickNode.displayString.length) * (this.noteLength);
+    }
+    this.releaseTime = this.noteLength - this.attackTime;
 
     this.vco.connect(this.vca);
 
@@ -101,9 +120,11 @@ var AudioNode = function () {
         this.vca.gain.setValueAtTime(0, audioContext.currentTime);
         this.vca.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + this.attackTime);
         this.vca.gain.linearRampToValueAtTime(0.0, audioContext.currentTime + this.attackTime + this.releaseTime);
-    };
+
+    };    
     
 };
+
 
 // This is a weird implementation of note conversion - should probably just switch to something like noteToConvert%12...
 function convertToKey(noteToConvert) {
