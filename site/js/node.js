@@ -82,6 +82,7 @@ var Node = function (newickNode, childID) {
     this.deactivatedTimer = 120.0;
 
     this.growing = true;
+    this.shrinking = false;
     var growCounter = 0.0;
 
     this.adjusting = false;
@@ -91,7 +92,7 @@ var Node = function (newickNode, childID) {
     
     this.triggered = false;
     if(this.level === 0) {
-        this.audioNode.noteLength = 4;
+        //this.audioNode.noteLength = 4;
     }
 
     /******** POSITION ********/
@@ -140,6 +141,10 @@ var Node = function (newickNode, childID) {
         recalculateOrigins();
     };
     
+    this.shrink = function(){
+        this.shrinking = true;
+        growCounter = 1.0;
+    };
 
     this.deactivate = function () {
 
@@ -157,7 +162,7 @@ var Node = function (newickNode, childID) {
         }
         colliders.splice(colliders.indexOf(this.colliderObj), 1);
         nodes.splice(nodes.indexOf(this), 1);
-
+        recalculateOrigins();
     };
     
     this.triggerChildren = function(){
@@ -187,6 +192,12 @@ var Node = function (newickNode, childID) {
             this.actualPos = this.lastOrigin.lerp(this.currentOrigin, this.adjustCounter);
         }
 
+        if(!this.shrinking){
+            this.innerMesh.scale.set(hoverCounter + 0.001, hoverCounter + 0.001, 1);
+        }else{
+            this.innerMesh.scale.set(growCounter, growCounter, growCounter);
+        }
+        
         if (this.level != 0) {
 
             // Creating the curve...            
@@ -214,10 +225,17 @@ var Node = function (newickNode, childID) {
 
             maxCurve.vertices = this.curve.getPoints(50);
 
-            if (this.growing) {
-                growCounter += 0.03;
+            if (this.growing || this.shrinking) {
+                if(this.growing){
+                    growCounter += 0.03;
+                }
+                if(this.shrinking){
+                    growCounter -= 0.03;
+                }
                 this.mesh.scale.set(growCounter, growCounter, growCounter);
+                if(this.activated){
                 this.innerMesh.scale.set(growCounter, growCounter, growCounter);
+                }
                 this.lineMat.opacity = growCounter * 0.5;
 
                 var tempCurve = new THREE.Geometry;
@@ -232,6 +250,9 @@ var Node = function (newickNode, childID) {
                 scene.add(this.curveObj);
             }
 
+            if(growCounter < 0.0){
+                this.deactivate();
+            }
             if (growCounter >= 1.0) {
                 growCounter = 0.0;
                 this.growing = false;
@@ -281,11 +302,11 @@ var Node = function (newickNode, childID) {
             hoverCounter = 0.0;
         }
 
-        this.innerMesh.scale.set(hoverCounter + 0.001, hoverCounter + 0.001, 1);
-
+        
+        
         this.inactiveColor.setHex(0xeeeeee);
         this.mesh.material.color.copy(this.inactiveColor.lerp(this.triggerColor, this.audioNode.vca.gain.value * 20.0));
-        if(!this.growing){
+        if(!this.growing && !this.shrinking){
             this.mesh.scale.set(1+this.audioNode.vca.gain.value * 10.0,1+this.audioNode.vca.gain.value * 10.0,1);
         }
 
@@ -301,9 +322,13 @@ var Node = function (newickNode, childID) {
         
         if(this.level==0){
             getAverage();
+            if(!this.audioNode.notePlaying && ampAverage == 0 && this.activated){
+                this.triggered = true;
+            }
+            /*
             if(!this.audioNode.notePlaying && audioContext.currentTime > this.audioNode.noteStart + this.audioNode.noteLength*2){
                 if(this.activated) this.triggered = true;
-            }
+            }*/
         }
     };
 };

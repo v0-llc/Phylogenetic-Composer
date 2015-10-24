@@ -2,7 +2,7 @@ var NewickParser = function(){
     
     this.newickNodes = [];
     
-    var rawText = mammalsString;
+    var rawText = mammalia;
     
     this.parseString = function(){
         
@@ -22,8 +22,8 @@ var NewickParser = function(){
                     this.newickNodes.push(combinationNode);
                     
                     var j = this.newickNodes.length-2;
-                    
-                    while(this.newickNodes[j].level > combinationNode.level){
+                    while(this.newickNodes[j].level > combinationNode.level && j > 0){
+                        
                         if(this.newickNodes[j].level == combinationNode.level+1){
                             if(combinationNode.displayString!=""){
                                 combinationNode.displayString = combinationNode.displayString.concat(' + ');

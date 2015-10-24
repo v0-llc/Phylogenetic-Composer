@@ -4,7 +4,7 @@ var analyser = audioContext.createAnalyser();
 analyser.fftSize = 2048;
 var bufferLength = analyser.frequencyBinCount;
 var dataArray = new Uint8Array(bufferLength);
-
+var ampAverage;
 function getAverage(){
     analyser.getByteFrequencyData(dataArray);
     
@@ -14,7 +14,7 @@ function getAverage(){
         runningValue += dataArray[i];
     }
     
-    var average = runningValue/dataArray.length;
+    ampAverage = runningValue/dataArray.length;
     
     //console.log(average);
 }
@@ -62,13 +62,15 @@ var AudioNode = function (newickNode) {
         this.noteValue = note;
         this.noteValue = convertToKey(this.noteValue);
         var freqValue = Math.pow(2, (this.noteValue - 69) / 12) * 440;
-        this.vco.frequency.value = freqValue;
+        if(isFinite(freqValue)){
+            this.vco.frequency.value = freqValue;
+        }
     };
     
     this.vco = audioContext.createOscillator();
     this.vco.type = "sine";
 
-    this.setFrequency(Math.floor((Math.random() * 48 + 40)));
+    //this.setFrequency(Math.floor((Math.random() * 48 + 40)));
 
     this.vco.start();
 
@@ -139,4 +141,18 @@ function convertToKey(noteToConvert) {
         convertedNote++;
     }
     return convertedNote;
+}
+
+function toggleAudio(){
+    if(audioContext.state === 'running'){
+        audioContext.suspend().then(function(){
+            document.getElementById("audioToggle").classList.remove("audioOn");
+            document.getElementById("audioToggle").classList.add("audioOff");
+        });
+    }else if(audioContext.state==='suspended'){
+        audioContext.resume().then(function(){
+            document.getElementById("audioToggle").classList.remove("audioOff");
+            document.getElementById("audioToggle").classList.add("audioOn");
+        });
+    }
 }

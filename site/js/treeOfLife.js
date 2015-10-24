@@ -64,21 +64,50 @@ var colliderGeom = new THREE.BoxGeometry(1, 1, 1);
 createNode(0, null);
 
 /******** PARTICLES ********/
+var particles;
 var pGeom = new THREE.Geometry();
-var pMat = new THREE.PointCloudMaterial({size: 0.04, sizeAttenuation: true});
-for(var i = 0; i < 1000; i++){
+var pSprite;
+var pLoader = new THREE.TextureLoader();
+pLoader.load('../images/particle.png', function (texture) {
+    pSprite = texture;
+    console.log(pSprite.image);
+
+    var pMat = new THREE.PointsMaterial({
+        size: 0.04,
+        sizeAttenuation: true,
+        map: pSprite,
+        transparent: true,
+        blending: THREE.AdditiveBlending
+    });
+
+    particles = new THREE.Points(pGeom, pMat);
+
+    scene.add(particles);
+});
+
+
+var offsets1 = [];
+var offsets2 = [];
+var offsets3 = [];
+var offsets4 = [];
+var speeds = [];
+for (var i = 0; i < 2000; i++) {
     var vertex = new THREE.Vector3();
     vertex.x = Math.random() * 80 - 40;
     vertex.y = Math.random() * 80 - 40;
     vertex.z = Math.random() * 20 - 10;
-    
+
     pGeom.vertices.push(vertex);
+    offsets1.push(Math.random());
+    offsets2.push(Math.random());
+    offsets3.push(Math.random());
+    offsets4.push(Math.random());
+    speeds.push(Math.random() / 5000);
 }
 
-var particles = new THREE.Points(pGeom, pMat);
 
-scene.add(particles);
 var particleNoiseCounter = 0.0;
+var particleNoiseAmp = 0.005;
 /******** GLOBALS ********/
 var randAmp = 0.21; // Controls the "amplitude" of perlin noise movement
 
@@ -101,7 +130,7 @@ function render() {
         var nodeNum = intersectedNodes[0].object.name;
         nodes[nodeNum].hovered = true;
         document.getElementById("currentNode").innerHTML = nodes[intersectedNodes[0].object.name].newickNode.displayString;
-    }else{
+    } else {
         document.getElementById("currentNode").innerHTML = "";
     }
 
@@ -111,14 +140,14 @@ function render() {
     }
 
     if (camera.fov != currentZoomDest) {
-        
-        if(camera.fov > currentZoomDest){
+
+        if (camera.fov > currentZoomDest) {
             camera.fov -= 1.0;
         }
-        if(camera.fov < currentZoomDest){
+        if (camera.fov < currentZoomDest) {
             camera.fov += 1.0;
         }
-        
+
         if (camera.fov < 10) {
             camera.fov = 10;
         }
@@ -128,16 +157,22 @@ function render() {
         camera.updateProjectionMatrix();
     }
 
-    particleNoiseCounter += 0.01;
-    
-    for(var i = 0; i < scene.children.length; i++){
+    particleNoiseCounter += 0.001;
+
+    for (var i = 0; i < scene.children.length; i++) {
         var object = scene.children[i];
-        
-        if(object instanceof THREE.Points){
+
+        if (object instanceof THREE.Points) {
 
         }
     }
-    
+    if (typeof particles !== 'undefined') {
+        for (var i = 0; i < particles.geometry.vertices.length; i++) {
+            particles.geometry.vertices[i].x += noise.simplex2(particleNoiseCounter * speeds[i] + offsets1[i], particleNoiseCounter * speeds[i] + offsets2[i]) * particleNoiseAmp;
+            particles.geometry.vertices[i].y += noise.simplex2(particleNoiseCounter * speeds[i] + offsets3[i], particleNoiseCounter * speeds[i] + offsets4[i]) * particleNoiseAmp;
+        }
+        particles.geometry.verticesNeedUpdate = true;
+    }
     renderer.render(scene, camera);
 
 }
@@ -178,7 +213,7 @@ function recalculateOrigins() {
             if (!currentNode.growing) {
                 currentNode.lastOrigin = currentNode.actualPos;
             }
-            currentNode.currentOrigin = new THREE.Vector3(-1 * ((levelList[i].length - 1) / 2) + j, currentNode.level, 0);
+            currentNode.currentOrigin = new THREE.Vector3((-1 * ((levelList[i].length - 1) / 2) + j)*1, currentNode.level*1, 0);
             currentNode.adjustCounter = 0.0;
         }
     }
@@ -188,7 +223,6 @@ function createNode(childID, parent) {
 
     if (parent != null) {
         var newNode = new Node(parent.newickNode.childNodes[childID], childID);
-
         newNode.parentNode = parent;
         newNode.childID = childID;
 
@@ -217,7 +251,7 @@ function removeChildren(parentNode) {
     parentNode.activeTimer = 0.0;
 
     for (var i = parentNode.allChildren.length - 1; i >= 0; i--) {
-        parentNode.allChildren[i].deactivate();
+        parentNode.allChildren[i].shrink();
     }
     parentNode.allChildren = [];
     recalculateOrigins();
@@ -245,18 +279,18 @@ function onMouseMove(event) {
         mouseDelta.x = mouseVec.x - mouseLast.x;
         mouseDelta.y = mouseVec.y - mouseLast.y;
 
-        if(camera.position.x <= 20 && camera.position.x >= -20){
+        if (camera.position.x <= 20 && camera.position.x >= -20) {
             camera.position.x -= mouseDelta.x * 8;
         }
-        if(camera.position.y <= 20 && camera.position.y >= -20){
+        if (camera.position.y <= 20 && camera.position.y >= -20) {
             camera.position.y -= mouseDelta.y * 8;
         }
 
-        if(camera.position.x > 20) camera.position.x = 20;
-        if(camera.position.x < -20) camera.position.x = -20;
-        if(camera.position.y > 20) camera.position.y = 20;
-        if(camera.position.y < -20) camera.position.y = -20;
-        
+        if (camera.position.x > 20) camera.position.x = 20;
+        if (camera.position.x < -20) camera.position.x = -20;
+        if (camera.position.y > 20) camera.position.y = 20;
+        if (camera.position.y < -20) camera.position.y = -20;
+
         mouseLast.x = mouseVec.x;
         mouseLast.y = mouseVec.y;
     }
@@ -264,7 +298,7 @@ function onMouseMove(event) {
 
 function onMouseClick(event) {
 
-    if(overlayShown) return;
+    if (overlayShown) return;
     mouseClicked = true;
     event.preventDefault();
 
@@ -280,7 +314,7 @@ function onMouseClick(event) {
 
         var selectedNode = nodes[intersectedNodes[0].object.name];
         selectedNode.triggered = true;
-        
+
         if (selectedNode.activated) {
             timeoutVar = window.setTimeout(function () {
                 removeChildren(selectedNode);
@@ -302,11 +336,11 @@ function onMouseClick(event) {
 
 function toggleArticle(state) {
     interactedWith = true;
-    
+
     toggleTitle(false);
-    
+
     articleShown = state;
-    
+
     if (articleShown) {
         //document.getElementById("articleToggle").className = "arrow rightArrow";
         document.getElementById("article").className = "visible";
@@ -316,22 +350,22 @@ function toggleArticle(state) {
     }
 }
 
-function toggleTitle(state){
-    if(state==true){
+function toggleTitle(state) {
+    if (state == true) {
         titleElement.classList.remove("topHidden");
         titleElement.classList.add("topShown");
-    }else{
+    } else {
         titleElement.classList.remove("topShown");
         titleElement.classList.add("topHidden");
     }
 }
 
-function toggleAbout(state){
+function toggleAbout(state) {
     overlayShown = state;
-    if(state==true){        
+    if (state == true) {
         titleElement.classList.remove("descriptHidden");
         titleElement.classList.add("descriptShown");
-    }else{
+    } else {
         titleElement.classList.remove("descriptShown");
         titleElement.classList.add("descriptHidden");
     }
@@ -343,7 +377,7 @@ function onMouseUp() {
 }
 
 function onDocumentMouseWheel(event) {
-    if(overlayShown) return;
+    if (overlayShown) return;
     if (event.wheelDeltaY) {
 
         if ((event.wheelDeltaY > 0 && currentZoomDest > 10) || (event.wheelDeltaY < 0 && currentZoomDest < 120)) {
