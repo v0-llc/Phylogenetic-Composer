@@ -6,6 +6,7 @@
 
     <title>Phylogenetic Composer</title>
 
+    <!-- GOOGLE FONTS -->
     <link href='https://fonts.googleapis.com/css?family=Libre+Baskerville:400,400italic,700' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Lato:400,300' rel='stylesheet' type='text/css'>
 
@@ -19,7 +20,9 @@
     <script type="text/javascript" src="js/node.js"></script>
     <script type="text/javascript" src="js/audioManager.js"></script>
     <script type="text/javascript" src="js/treeOfLife.js" defer></script>
+    <!-- We need to load the page before this, so it's deferred -->
 
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="style.css">
 
 </head>
@@ -28,53 +31,58 @@
 
 <body>
 
+    <!-- Container for all of the 3D Visuals -->
+    <div id="glContainer"></div>
 
-    <div id="glContainer">
+    <div class="button" id="about">about</div>
 
-    </div>
+    <div class="button audioOn" id="audioToggle"></div>
 
-    <div class="button" id="about" onclick="toggleArticle(false); toggleAbout(true); toggleTitle(true)">
-        about
-    </div>
-    <div class="button audioOn" id="audioToggle" onclick="toggleAudio()"></div>
+    <article>
+        <div id="title" class="topShown descriptHidden">
 
-    <div id="title" class="topShown descriptHidden">
-        <h1 id="descriptHeading"><em>Phylogenetic<br>Composer</em></h1>
-        <div class="borderDiv"></div>
-        <h2 id="descriptContent">Procedural Music with the Tree of Life</h2>
+            <header>
+                <h1 id="descriptHeading"><em>Phylogenetic<br>Composer</em></h1>
 
-        <div id="description">
-            <p>The Phylogenetic Composer is an interface between the <a href="http://opentreeoflife.org/" target="_blank">Open Tree of Life</a> and <a href="https://www.wikipedia.org/" target="_blank">Wikipedia</a>, created primarily with <a href="http://threejs.org/" target="_blank">three.js</a> and the <a href="http://webaudio.github.io/web-audio-api/" target="_blank">Web Audio API</a>. The Open Tree of Life provides a comprehensive database of every known species on our planet, and their evolutionary relationships. Circles in the Phylogenetic Composer represent individual taxa (or multiple related taxa).</p>
-            <p>Click or tap on these circles in order to reveal descendant taxa and species. Click and hold again to "close" open taxa. You can also zoom in and out with the mouse wheel, and click and drag to move the camera to get a closer look at certain branches of the tree of life.</p>
-            <p>As you explore the tree, its branches and leaves will generate musical structures, using the textual data of each node. If you're interested in the specific implementation of this algorithm, or simply want to learn more about this project, please visit the GitHub link below.</p>
-            
-            <p style="text-align:right">- Theodore Michels, 2015</p>
-            
+                <div class="borderDiv"></div>
+                <!-- Just a little accent -->
 
-            <a href="https://github.com/TheodoreMichels/Phylogenetic-Composer" target="_blank">
-                <img src="images/githubiconwhite.svg" style="width:60px; height: 60px">
-            </a>
+                <h2 id="descriptContent">Procedural Music with the Tree of Life</h2>
+            </header>
 
-            <div style="text-align:center; margin-top: 40px;">
-            <div class="button" onclick="toggleAbout(false)">close</div>
+            <div id="description">
+                <p>The Phylogenetic Composer is an interface between the <a href="http://opentreeoflife.org/" target="_blank">Open Tree of Life</a> and <a href="https://www.wikipedia.org/" target="_blank">Wikipedia</a>, created primarily with <a href="http://threejs.org/" target="_blank">three.js</a> and the <a href="http://webaudio.github.io/web-audio-api/" target="_blank">Web Audio API</a>. The Open Tree of Life provides a comprehensive database of every known species on our planet, and their evolutionary relationships. Circles in the Phylogenetic Composer represent individual taxa (or multiple related taxa).</p>
+                <p>Click or tap on these circles in order to reveal descendant taxa and species. Click and hold again to "close" open taxa. You can also zoom in and out with the mouse wheel, and click and drag to move the camera to get a closer look at certain branches of the tree of life.</p>
+                <p>As you explore the tree, its branches and leaves will generate musical structures, using the textual data of each node. If you're interested in the specific implementation of this algorithm, or simply want to learn more about this project, please visit the GitHub link below.</p>
+
+                <p style="text-align:right">- Theodore Michels, 2015</p>
+
+
+                <a href="https://github.com/TheodoreMichels/Phylogenetic-Composer" target="_blank">
+                    <img src="images/githubiconwhite.svg" style="width:60px; height: 60px">
+                </a>
+
+                <div style="text-align:center; margin-top: 40px;">
+                    <div class="button" onclick="toggleAbout(false)">close</div>
+                </div>
+
             </div>
-            
         </div>
-    </div>
-
+    </article>
+    
+    <!-------- WIKIPEDIA -------->
     <div id="article" class="hidden">
         <div id="articleToggle" class="arrow leftArrow" onclick="toggleArticle(!articleShown)">
         </div>
         <div id="logoBox">
-            <img id="wikiArrow" src="images/Wikipedia-W-visual-balanced.svg">
+            <img id="wikiLogo" src="images/Wikipedia-W-visual-balanced.svg">
         </div>
 
         <iframe frameborder="0" id="articleContent" src="http://en.m.wikipedia.org/wiki/mammalia"></iframe>
     </div>
 
-    <div id="currentNode">
-
-    </div>
+    <!-- Displays the taxon/species name of the current node -->
+    <div id="currentNode"></div>
 
 </body>
 

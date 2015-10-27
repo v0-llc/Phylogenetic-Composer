@@ -378,12 +378,10 @@ function onMouseUp() {
 
 function onDocumentMouseWheel(event) {
     if (overlayShown) return;
-    if (event.wheelDeltaY) {
+    if (event.deltaY) {
 
-        if ((event.wheelDeltaY > 0 && currentZoomDest > 10) || (event.wheelDeltaY < 0 && currentZoomDest < 120)) {
-            currentZoomDest -= event.wheelDeltaY * 0.05;
-
-
+        if ((event.deltaY < 0 && currentZoomDest > 10) || (event.deltaY > 0 && currentZoomDest < 120)) {
+            currentZoomDest += event.deltaY * 0.05;
         }
     }
 }
@@ -391,7 +389,10 @@ function onDocumentMouseWheel(event) {
 document.addEventListener('mousemove', onMouseMove, false);
 document.addEventListener('mousedown', onMouseClick, false);
 document.addEventListener('mouseup', onMouseUp, false);
-document.addEventListener('mousewheel', onDocumentMouseWheel, false);
+document.addEventListener('wheel', onDocumentMouseWheel, false);
+
+document.getElementById("audioToggle").addEventListener("click", toggleAudio);
+document.getElementById("about").addEventListener("click", function(){toggleArticle(false); toggleAbout(true); toggleTitle(true)});
 
 window.addEventListener('resize', onWindowResize, false);
 

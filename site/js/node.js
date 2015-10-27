@@ -1,8 +1,9 @@
 /*
-Contains the Node class which contains most of the visual behavior for individual elements on the tree.
+Contains the Node class which governs most of the visual behavior for individual elements on the tree.
 */
 
-// The constructor requires an associated NewickNode, which contains the associated phylogenetic information.
+// The constructor requires an associated Newick Node, which contains the associated phylogenetic information.
+// The "child ID" is used to calculate the note value for this node
 var Node = function (newickNode, childID) {
     this.newickNode = newickNode;
     nameToNotes(this.newickNode);
@@ -300,9 +301,7 @@ var Node = function (newickNode, childID) {
 
         if (hoverCounter < 0) {
             hoverCounter = 0.0;
-        }
-
-        
+        }        
         
         this.inactiveColor.setHex(0xeeeeee);
         this.mesh.material.color.copy(this.inactiveColor.lerp(this.triggerColor, this.audioNode.vca.gain.value * 20.0));
