@@ -1,3 +1,7 @@
+/*
+Central script which essentially combines all of the associated scripts.
+*/
+
 // Parses the referenced Newick string.
 var parser = new NewickParser();
 parser.parseString();
@@ -10,17 +14,18 @@ camera.position.y = 5;
 camera.rotation.x = 0;
 //camera.rotation.y = 1;
 
-var articleShown = false;
-var articleString = "Mammalia";
+var articleShown = false; // Is the Wikipedia window shown?
+var articleString = "Mammalia"; // Currently defaults to "Mammalia"
 
 var mouseClicked = false;
 var timeoutVar;
-var interactedWith = false;
+var interactedWith = false; // Has the user interacted with the tree or Wikipedia article?
 var clickStart = new THREE.Vector2();
 var clickDelta = new THREE.Vector2();
 
 var currentZoomDest = camera.fov;
 
+// Used for mouse interaction
 var raycaster = new THREE.Raycaster();
 var mouseVec = new THREE.Vector2();
 var mouseLast = new THREE.Vector2();
@@ -49,9 +54,9 @@ var nodes = [];
 /******** COLLIDERS ********/
 // An array of all colliders (cubes around nodes)
 var colliders = [];
-// Holds the nodes which the mouse is hovering over.
+// Holds the nodes which the mouse is hovering over. (Should just be a single node)
 var intersectedNodes;
-
+// An invisible material (can be shown for troubleshooting)
 var colliderMat = new THREE.MeshBasicMaterial({
     color: 0xffffff
 });
@@ -68,16 +73,16 @@ var particles;
 var pGeom = new THREE.Geometry();
 var pSprite;
 var pLoader = new THREE.TextureLoader();
+// Need to wait until the texture is loaded to create the particles
 pLoader.load('../images/particle.png', function (texture) {
     pSprite = texture;
-    console.log(pSprite.image);
 
     var pMat = new THREE.PointsMaterial({
         size: 0.04,
         sizeAttenuation: true,
         map: pSprite,
         transparent: true,
-        blending: THREE.AdditiveBlending
+        blending: THREE.NormalBlending // There seems to be an issue with additive blending
     });
 
     particles = new THREE.Points(pGeom, pMat);
@@ -85,7 +90,7 @@ pLoader.load('../images/particle.png', function (texture) {
     scene.add(particles);
 });
 
-
+/******** NOISE VARIABLES ********/
 var offsets1 = [];
 var offsets2 = [];
 var offsets3 = [];
@@ -105,15 +110,17 @@ for (var i = 0; i < 2000; i++) {
     speeds.push(Math.random() / 5000);
 }
 
-
 var particleNoiseCounter = 0.0;
 var particleNoiseAmp = 0.005;
+
 /******** GLOBALS ********/
 var randAmp = 0.21; // Controls the "amplitude" of perlin noise movement
 
 var titleElement = document.getElementById("title");
+var dropdown = document.getElementById("dropdown");
 
 var overlayShown = false;
+var titleShown = true;
 
 /******** RENDER ********/
 function render() {
@@ -122,10 +129,12 @@ function render() {
     raycaster.setFromCamera(mouseVec, camera);
     intersectedNodes = raycaster.intersectObjects(colliders);
 
+    // Initialize all to false
     for (var i = 0; i < nodes.length; i++) {
         nodes[i].hovered = false;
     }
 
+    // If the mouse is over a node, display its name. Otherwise, don't show anything.
     if (intersectedNodes.length > 0 && !overlayShown) {
         var nodeNum = intersectedNodes[0].object.name;
         nodes[nodeNum].hovered = true;
@@ -137,8 +146,10 @@ function render() {
     // Look through all of the nodes and update them.
     for (var i = nodes.length - 1; i >= 0; i--) {
         nodes[i].update();
+        //console.log(nodes[0].audioNode.vca.gain.value);
     }
 
+    // Used for smooth camera zoom
     if (camera.fov != currentZoomDest) {
 
         if (camera.fov > currentZoomDest) {
@@ -148,6 +159,7 @@ function render() {
             camera.fov += 1.0;
         }
 
+        // Constraints
         if (camera.fov < 10) {
             camera.fov = 10;
         }
@@ -159,13 +171,7 @@ function render() {
 
     particleNoiseCounter += 0.001;
 
-    for (var i = 0; i < scene.children.length; i++) {
-        var object = scene.children[i];
-
-        if (object instanceof THREE.Points) {
-
-        }
-    }
+    // Once the particles are in the scene, add noise to their positions
     if (typeof particles !== 'undefined') {
         for (var i = 0; i < particles.geometry.vertices.length; i++) {
             particles.geometry.vertices[i].x += noise.simplex2(particleNoiseCounter * speeds[i] + offsets1[i], particleNoiseCounter * speeds[i] + offsets2[i]) * particleNoiseAmp;
@@ -213,7 +219,7 @@ function recalculateOrigins() {
             if (!currentNode.growing) {
                 currentNode.lastOrigin = currentNode.actualPos;
             }
-            currentNode.currentOrigin = new THREE.Vector3((-1 * ((levelList[i].length - 1) / 2) + j)*1, currentNode.level*1, 0);
+            currentNode.currentOrigin = new THREE.Vector3((-1 * ((levelList[i].length - 1) / 2) + j) * 1, currentNode.level * 1, 0);
             currentNode.adjustCounter = 0.0;
         }
     }
@@ -335,11 +341,14 @@ function onMouseClick(event) {
 }
 
 function toggleArticle(state) {
+    
     interactedWith = true;
 
-    toggleTitle(false);
-
     articleShown = state;
+    
+    if(articleShown){
+        toggleTitle(false);
+    }    
 
     if (articleShown) {
         //document.getElementById("articleToggle").className = "arrow rightArrow";
@@ -351,23 +360,38 @@ function toggleArticle(state) {
 }
 
 function toggleTitle(state) {
+
     if (state == true) {
         titleElement.classList.remove("topHidden");
-        titleElement.classList.add("topShown");
+        titleElement.classList.add("topShown");        
+        
+        if (!titleShown) {
+            window.setTimeout(function () {
+                toggleAbout(true)
+            }, 1000);
+        }else{
+            toggleAbout(true);
+        }
+        
     } else {
         titleElement.classList.remove("topShown");
         titleElement.classList.add("topHidden");
+
+        
     }
+
+    titleShown = state;
 }
 
 function toggleAbout(state) {
     overlayShown = state;
     if (state == true) {
-        titleElement.classList.remove("descriptHidden");
-        titleElement.classList.add("descriptShown");
+        dropdown.classList.remove("descriptHidden");
+        dropdown.classList.add("descriptShown");
+
     } else {
-        titleElement.classList.remove("descriptShown");
-        titleElement.classList.add("descriptHidden");
+        dropdown.classList.remove("descriptShown");
+        dropdown.classList.add("descriptHidden");
     }
 }
 
@@ -392,7 +416,19 @@ document.addEventListener('mouseup', onMouseUp, false);
 document.addEventListener('wheel', onDocumentMouseWheel, false);
 
 document.getElementById("audioToggle").addEventListener("click", toggleAudio);
-document.getElementById("about").addEventListener("click", function(){toggleArticle(false); toggleAbout(true); toggleTitle(true)});
+document.getElementById("about").addEventListener("click", function () {
+    toggleArticle(false);
+    toggleTitle(true);
+});
+document.getElementById("closeButton").addEventListener("click", function () {
+    toggleAbout(false);
+});
+document.getElementById("dropdown").addEventListener("click", function(){
+    toggleAbout(false);
+});
+document.getElementById("articleToggle").addEventListener("click", function () {
+    toggleArticle(!articleShown);
+});
 
 window.addEventListener('resize', onWindowResize, false);
 

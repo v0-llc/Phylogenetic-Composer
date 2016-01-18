@@ -1,3 +1,7 @@
+/*
+Parses a Newick String in order to populate nodes with data and define their relationships.
+*/
+
 var NewickParser = function(){
     
     this.newickNodes = [];

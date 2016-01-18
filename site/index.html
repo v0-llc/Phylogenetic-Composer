@@ -39,7 +39,7 @@
     <div class="button audioOn" id="audioToggle"></div>
 
     <article>
-        <div id="title" class="topShown descriptHidden">
+        <div id="title" class="topShown">
 
             <header>
                 <h1 id="descriptHeading"><em>Phylogenetic<br>Composer</em></h1>
@@ -49,6 +49,10 @@
 
                 <h2 id="descriptContent">Procedural Music with the Tree of Life</h2>
             </header>
+        </div>
+        <div id="dropdown" class="descriptHidden">
+            <h3>Currently, this page is only <strong>fully</strong> supported in Chrome, Opera, and Edge browsers.</h3>
+
 
             <div id="description">
                 <p>The Phylogenetic Composer is an interface between the <a href="http://opentreeoflife.org/" target="_blank">Open Tree of Life</a> and <a href="https://www.wikipedia.org/" target="_blank">Wikipedia</a>, created primarily with <a href="http://threejs.org/" target="_blank">three.js</a> and the <a href="http://webaudio.github.io/web-audio-api/" target="_blank">Web Audio API</a>. The Open Tree of Life provides a comprehensive database of every known species on our planet, and their evolutionary relationships. Circles in the Phylogenetic Composer represent individual taxa (or multiple related taxa).</p>
@@ -63,16 +67,17 @@
                 </a>
 
                 <div style="text-align:center; margin-top: 40px;">
-                    <div class="button" onclick="toggleAbout(false)">close</div>
+                    <div class="button" id="closeButton">close</div>
                 </div>
 
             </div>
         </div>
+
     </article>
-    
+
     <!-------- WIKIPEDIA -------->
     <div id="article" class="hidden">
-        <div id="articleToggle" class="arrow leftArrow" onclick="toggleArticle(!articleShown)">
+        <div id="articleToggle" class="arrow leftArrow">
         </div>
         <div id="logoBox">
             <img id="wikiLogo" src="images/Wikipedia-W-visual-balanced.svg">

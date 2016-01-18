@@ -6,7 +6,7 @@ Contains the Node class which governs most of the visual behavior for individual
 // The "child ID" is used to calculate the note value for this node
 var Node = function (newickNode, childID) {
     this.newickNode = newickNode;
-    nameToNotes(this.newickNode);
+    nameToNotes(this.newickNode); // Use the data in the Newick Node to generate pitch values, envelope, etc...
     this.audioNode = new AudioNode(newickNode);    
     
     // Effectively, the "distance" from the tree's origin
@@ -308,7 +308,6 @@ var Node = function (newickNode, childID) {
         if(!this.growing && !this.shrinking){
             this.mesh.scale.set(1+this.audioNode.vca.gain.value * 10.0,1+this.audioNode.vca.gain.value * 10.0,1);
         }
-
         if(this.triggered && !this.audioNode.notePlaying){
             this.audioNode.notePlaying = true;
             this.audioNode.trigger();
