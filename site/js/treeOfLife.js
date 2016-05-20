@@ -136,13 +136,20 @@ function render() {
 
     // If the mouse is over a node, display its name. Otherwise, don't show anything.
     if (intersectedNodes.length > 0 && !overlayShown) {
+        
         var nodeNum = intersectedNodes[0].object.name;
         nodes[nodeNum].hovered = true;
         document.getElementById("currentNode").innerHTML = nodes[intersectedNodes[0].object.name].newickNode.displayString;
-    } else {
+    }else if(!interactedWith){
+        document.getElementById("currentNode").innerHTML = "Click Here.";
+    }else{
         document.getElementById("currentNode").innerHTML = "";
     }
-
+    if(intersectedNodes.length > 0){
+        $("html, body").css("cursor", "pointer");
+    }else{
+        $("html, body").css("cursor", "auto");
+    }
     // Look through all of the nodes and update them.
     for (var i = nodes.length - 1; i >= 0; i--) {
         nodes[i].update();

@@ -49,7 +49,9 @@ var Node = function (newickNode, childID) {
             color: 0xcc5511
         });
     }
-
+    this.originAccentMat = new THREE.MeshBasicMaterial({
+        color: 0xcc5511
+    });
     // Inner highlight
     this.innerGeom = new THREE.CircleGeometry(circleRadius * 0.85, 32);
     this.innerMesh = new THREE.Mesh(this.innerGeom, this.nodeHighlightMat);
@@ -123,6 +125,10 @@ var Node = function (newickNode, childID) {
         noteValue = Math.round((parentNote + thisNote)/2);
     }else{
         noteValue = this.newickNode.notesArray[0];
+        console.log("origin");
+        this.originAccent = new THREE.CircleGeometry(circleRadius*2, 40);
+        this.originAccentMesh = new THREE.Mesh(this.originAccent, this.originAccentMat);
+        scene.add(this.originAccentMesh);
     }
     
     noteValue -= 20;
@@ -276,7 +282,11 @@ var Node = function (newickNode, childID) {
         this.mesh.position.y += noise.simplex2(noiseCounter * this.randSpeed + this.offset3, noiseCounter * this.randSpeed + this.offset4) * randAmp;
 
         this.innerMesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z + 0.001);
-
+        if(this.level == 0){
+            this.originAccentMesh.position.set(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z - 0.002);
+            var scaleValue = Math.sin(noiseCounter*4.0) * circleRadius * 1.0 + (circleRadius * 7.0);
+            this.originAccentMesh.scale.set(scaleValue, scaleValue, scaleValue);
+        }
         /******** SELECTION SCALING ********/
         if (!this.activated) {
             if ((this.newickNode.childNodes.length == 0 || this.hovered) && hoverCounter < 1.0) {
