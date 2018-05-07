@@ -74,7 +74,7 @@ var pGeom = new THREE.Geometry();
 var pSprite;
 var pLoader = new THREE.TextureLoader();
 // Need to wait until the texture is loaded to create the particles
-pLoader.load('../images/particle.png', function (texture) {
+pLoader.load('images/particle.png', function (texture) {
     pSprite = texture;
 
     var pMat = new THREE.PointsMaterial({
